@@ -12,8 +12,12 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyemail'])->name('verification.verify');
+Route::post('/forgot-password', [AuthController::class, 'sendresetpassword'])->middleware('throttle:5,1');
+Route::post('/reset-password', [AuthController::class, 'resetpassword']);
 
 Route::middleware('auth:sanctum')->group(function(){
-    Route::apiResource('profile', ProfileController::class);
+    Route::post('/email/resend', [AuthController::class, 'resendverifyemail'])->middleware(['api', 'throttle:email-request']);
+    Route::apiResource('profile', ProfileController::class)->middleware('verified');
     Route::post('/logout', [AuthController::class, 'logout']);
 });
